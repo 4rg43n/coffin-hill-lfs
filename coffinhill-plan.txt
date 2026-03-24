@@ -1,0 +1,46 @@
+Coffin Hill
+Coffin Hill is a horror themed pokemon style game for PC and Android using Unity. Containing roguelite elements, and random elements to increase the longevity of the game.
+We'll start off by creating a clone of Pokemon Red/Blue (the old version, 1996) complete with placeholder images and type tables (rock vs water, etc)
+We'll evolve this after the initial game is created and running so make sure systems are created with an eye towards expansion/refactoring later.
+
+General Considerations - 
+	* All created assets should exist under GameContent inside the Assets folder. Scripts will go in GameContent/Scripts, animations GameContent/Animations, etc.
+	* Use good object oriented programming practices when possible
+	* Saving and loading will be to the applications AppData and use the 'Easy Save 3' Unity package already installed
+	* Static methods should end with 'ST' 
+	* Use a factory pattern save/load objects
+	* Use Coffin Hill as the game title
+	* Design everything all input around a single button click (touch for Android, left mouse for PC)
+	* UI design around Portrait mode Full HD (1080x1920)
+	* The game should run in portrait mode (1080x1920) on android don't let rotating the device change from portrait to landscape
+
+
+Gameplay -
+	* Exactly like Pokemon Red initialy
+	* We'll evolve the system from there
+   
+Feel free to ask me clarifying questions
+
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+
+
