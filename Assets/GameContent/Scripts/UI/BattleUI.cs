@@ -35,6 +35,11 @@ public class BattleUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI battleLogText;
     [SerializeField] private ScrollRect battleLogScroll;
 
+    [Header("Debug")]
+    [SerializeField] private GameObject debugPanel;
+    [SerializeField] private Button debugWinButton;
+    [SerializeField] private Button debugLoseButton;
+
     public event Action<MoveData> OnMoveSelected;
     public event Action OnRunSelected;
     public event Action OnBagSelected;
@@ -55,8 +60,18 @@ public class BattleUI : MonoBehaviour
             _battleManager?.OnRunSelectedST();
         });
 
+        if (battleLogText) battleLogText.text = "";
+
         ShowActionMenuST(false);
         if (moveMenu) moveMenu.SetActive(false);
+
+        bool debug = _battleManager != null && _battleManager.debugMode;
+        if (debugPanel) debugPanel.SetActive(debug);
+        if (debug)
+        {
+            if (debugWinButton)  debugWinButton.onClick.AddListener(() => _battleManager.DebugWinST());
+            if (debugLoseButton) debugLoseButton.onClick.AddListener(() => _battleManager.DebugLoseST());
+        }
     }
 
     public void ShowActionMenuST(bool show)

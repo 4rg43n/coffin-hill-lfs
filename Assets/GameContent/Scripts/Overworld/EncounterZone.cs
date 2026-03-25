@@ -17,7 +17,6 @@ public class EncounterZone : MonoBehaviour
         int lvl = Random.Range(levelRange.x, levelRange.y + 1);
         PokemonInstance enemy = PokemonData.CreateInstanceST(picked, lvl);
 
-        BattleManager bm = FindAnyObjectByType<BattleManager>();
-        bm?.StartWildEncounterST(enemy);
+        BattleManager.QueueWildEncounterST(enemy);
     }
 }

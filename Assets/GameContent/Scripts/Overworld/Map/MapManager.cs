@@ -102,7 +102,35 @@ public class MapManager : MonoBehaviour
     private void StartBattleST(MapNodeData node)
     {
         Debug.Log($"[MapManager] Starting battle at node {node.id} ({node.type})");
-        SceneManager.LoadScene("Battle");
+
+        PokemonDatabase db = PokemonDatabase.GetInstanceST();
+        if (db == null || db.allPokemon == null || db.allPokemon.Length == 0)
+        {
+            Debug.LogError("[MapManager] PokemonDatabase not found — cannot start battle.");
+            return;
+        }
+
+        // Pick a random species
+        PokemonData species = db.allPokemon[UnityEngine.Random.Range(0, db.allPokemon.Length)];
+
+        // Scale level to layer + node type
+        var (minLvl, maxLvl) = LevelRangeForNodeST(node);
+        int level = UnityEngine.Random.Range(minLvl, maxLvl + 1);
+
+        PokemonInstance enemy = PokemonInstance.CreateST(species, level);
+        BattleManager.QueueWildEncounterST(enemy);
+    }
+
+    private static (int min, int max) LevelRangeForNodeST(MapNodeData node)
+    {
+        int l = node.layerIndex;
+        return node.type switch
+        {
+            MapNodeType.Battle => (Mathf.Max(2, l),     Mathf.Max(5,  l + 3)),
+            MapNodeType.Elite  => (Mathf.Max(5, l + 2), Mathf.Max(9,  l + 6)),
+            MapNodeType.Boss   => (Mathf.Max(8, l + 4), Mathf.Max(12, l + 8)),
+            _                  => (3, 7)
+        };
     }
 
     private void HealPartyST()

@@ -68,6 +68,99 @@ public static class DataSetup
         Debug.Log("CoffinHill: Placeholder Pokemon assets created.");
     }
 
+    [MenuItem("CoffinHill/Setup Resources Database")]
+    public static void SetupResourcesDatabaseST()
+    {
+        const string movesPath   = "Assets/GameContent/Data/Moves";
+        const string pokemonPath = "Assets/GameContent/Data/Pokemon";
+        const string dbDest      = "Assets/GameContent/Resources/PokemonDatabase.asset";
+
+        // ── Load moves by filename ────────────────────────────────────────
+        MoveData Mv(string file) =>
+            AssetDatabase.LoadAssetAtPath<MoveData>($"{movesPath}/{file}.asset");
+
+        MoveData tackle      = Mv("Tackle");
+        MoveData scratch     = Mv("Scratch");
+        MoveData ember       = Mv("Ember");
+        MoveData waterGun    = Mv("Water_Gun");
+        MoveData vineWhip    = Mv("Vine_Whip");
+        MoveData rockThrow   = Mv("Rock_Throw");
+        MoveData growl       = Mv("Growl");
+        MoveData tailWhip    = Mv("Tail_Whip");
+        MoveData poisonSting = Mv("Poison_Sting");
+        MoveData slash       = Mv("Slash");
+        MoveData hyperFang   = Mv("Hyper_Fang");
+
+        LevelMove LM(int lvl, MoveData m) => new LevelMove { level = lvl, move = m };
+
+        // ── Learnsets ─────────────────────────────────────────────────────
+        // Format: level learned → move. Pokemon learn moves up to their level on creation.
+        var learnsets = new System.Collections.Generic.Dictionary<string, LevelMove[]>
+        {
+            ["Embercub"]    = new[] { LM(1,scratch),  LM(1,growl),    LM(7,ember),     LM(13,tailWhip)  },
+            ["Flamepaw"]    = new[] { LM(1,scratch),  LM(1,growl),    LM(7,ember),     LM(16,slash)     },
+            ["Puddle"]      = new[] { LM(1,tackle),   LM(1,tailWhip), LM(7,waterGun),  LM(13,growl)     },
+            ["Tidalfin"]    = new[] { LM(1,tackle),   LM(1,tailWhip), LM(7,waterGun),  LM(16,slash)     },
+            ["Sproutling"]  = new[] { LM(1,tackle),   LM(1,growl),    LM(7,vineWhip),  LM(13,poisonSting)},
+            ["Thornweed"]   = new[] { LM(1,tackle),   LM(1,growl),    LM(7,vineWhip),  LM(16,slash)     },
+            ["Pebble"]      = new[] { LM(1,tackle),   LM(4,scratch),  LM(7,rockThrow), LM(10,growl)     },
+            ["Boulderback"] = new[] { LM(1,tackle),   LM(4,rockThrow),LM(7,scratch),   LM(16,hyperFang) },
+        };
+
+        // ── Apply learnsets to each PokemonData asset ─────────────────────
+        var allPokemon = new System.Collections.Generic.List<PokemonData>();
+
+        foreach (string guid in AssetDatabase.FindAssets("t:PokemonData", new[] { pokemonPath }))
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            PokemonData p = AssetDatabase.LoadAssetAtPath<PokemonData>(path);
+            if (p == null) continue;
+
+            if (learnsets.TryGetValue(p.speciesName, out LevelMove[] ls))
+            {
+                SerializedObject so   = new SerializedObject(p);
+                SerializedProperty lp = so.FindProperty("learnset");
+                lp.arraySize = ls.Length;
+                for (int i = 0; i < ls.Length; i++)
+                {
+                    var elem = lp.GetArrayElementAtIndex(i);
+                    elem.FindPropertyRelative("level").intValue              = ls[i].level;
+                    elem.FindPropertyRelative("move").objectReferenceValue   = ls[i].move;
+                }
+                so.ApplyModifiedProperties();
+                EditorUtility.SetDirty(p);
+            }
+            else
+            {
+                Debug.LogWarning($"[SetupResourcesDatabase] No learnset defined for '{p.speciesName}'.");
+            }
+
+            allPokemon.Add(p);
+        }
+
+        allPokemon.Sort((a, b) => a.pokedexNumber.CompareTo(b.pokedexNumber));
+
+        // ── Create / update PokemonDatabase in Resources ──────────────────
+        PokemonDatabase db = AssetDatabase.LoadAssetAtPath<PokemonDatabase>(dbDest);
+        if (db == null)
+        {
+            db = ScriptableObject.CreateInstance<PokemonDatabase>();
+            AssetDatabase.CreateAsset(db, dbDest);
+        }
+
+        SerializedObject dbSO  = new SerializedObject(db);
+        SerializedProperty arr = dbSO.FindProperty("allPokemon");
+        arr.arraySize = allPokemon.Count;
+        for (int i = 0; i < allPokemon.Count; i++)
+            arr.GetArrayElementAtIndex(i).objectReferenceValue = allPokemon[i];
+        dbSO.ApplyModifiedProperties();
+        EditorUtility.SetDirty(db);
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log($"CoffinHill: Resources/PokemonDatabase ready — {allPokemon.Count} pokemon, learnsets applied.");
+    }
+
     [MenuItem("CoffinHill/Create Placeholder Moves")]
     public static void CreatePlaceholderMovesST()
     {
