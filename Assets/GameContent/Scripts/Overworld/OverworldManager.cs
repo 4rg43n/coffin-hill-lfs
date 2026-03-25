@@ -13,10 +13,18 @@ public class OverworldManager : MonoBehaviour
     private void Start()
     {
         GameManager.OnStateChanged += OnGameStateChangedST;
-        // The Overworld scene loads after the state change fires, so we always miss the event.
-        // Check the current state directly instead.
-        if (GameManager.GetInstanceST()?.CurrentState == GameState.Overworld)
+
+        GameManager gm = GameManager.GetInstanceST();
+        if (gm != null && gm.CurrentState == GameState.Overworld)
+        {
+            // Normal flow: arrived here via GameManager state transition.
             OnGameStateChangedST(GameState.Overworld);
+        }
+        else
+        {
+            // Direct-scene play (editor testing): init without GameManager state.
+            InitMapST();
+        }
     }
 
     private void OnDestroy()
@@ -28,7 +36,11 @@ public class OverworldManager : MonoBehaviour
     private void OnGameStateChangedST(GameState state)
     {
         if (state != GameState.Overworld) return;
+        InitMapST();
+    }
 
+    private void InitMapST()
+    {
         MapManager mm = MapManager.GetInstanceST();
         if (mm == null) return;
 

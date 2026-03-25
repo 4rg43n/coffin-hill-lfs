@@ -8,6 +8,9 @@ public class MapCameraController : MonoBehaviour
     private static MapCameraController _instance;
 
     [SerializeField] private float dragThresholdPx = 12f;
+    [SerializeField] private float zoomSpeed   = 5f;
+    [SerializeField] private float zoomMin     = 2f;
+    [SerializeField] private float zoomMax     = 15f;
 
     private Camera _cam;
 
@@ -37,7 +40,23 @@ public class MapCameraController : MonoBehaviour
 
     private void Update()
     {
-        if (GameManager.GetInstanceST()?.CurrentState != GameState.Overworld) return;
+        GameManager gm = GameManager.GetInstanceST();
+        if (gm != null && gm.CurrentState != GameState.Overworld) return;
+
+        InputManager im = GameManager.GetInstanceST()?.InputManager;
+
+        // Zoom (mouse wheel or pinch) — handled first; pinch suppresses drag/tap
+        float zoomDelta = im?.GetZoomDeltaST() ?? 0f;
+        if (zoomDelta != 0f)
+            _cam.orthographicSize = Mathf.Clamp(_cam.orthographicSize - zoomDelta * zoomSpeed, zoomMin, zoomMax);
+
+        // Suppress drag and tap while a two-finger pinch is active
+        if (im?.IsPinchingZoomST() ?? false)
+        {
+            _pressing   = false;
+            _isDragging = false;
+            return;
+        }
 
         Vector2 screenPos = RawScreenPosST();
         bool pressedThisFrame   = PressStartedThisFrameST();

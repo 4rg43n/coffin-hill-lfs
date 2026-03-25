@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MapManager : MonoBehaviour
 {
@@ -100,24 +101,19 @@ public class MapManager : MonoBehaviour
 
     private void StartBattleST(MapNodeData node)
     {
-        // Placeholder: wire up to BattleManager when encounter data is set up per node
         Debug.Log($"[MapManager] Starting battle at node {node.id} ({node.type})");
-        //GameManager.GetInstanceST()?.ChangeStateST(GameState.Battle);
+        SceneManager.LoadScene("Battle");
     }
 
     private void HealPartyST()
     {
-        // TODO: heal party Pokemon to full HP
-        Debug.Log("[MapManager] Rest node — healing party.");
-        //DialogueManager dm = DialogueManager.GetInstanceST();
-        //dm?.ShowDialogueST(new[] { "You rest and recover your strength." }, null);
+        Debug.Log("[MapManager] Rest node — loading HealParty scene.");
+        SceneManager.LoadScene("HealParty");
     }
 
     private void TriggerNPCEventST()
     {
-        // Placeholder: show generic dialogue until NPC event data is per-node
-        Debug.Log("[MapManager] NPC node.");
-        //DialogueManager dm = DialogueManager.GetInstanceST();
-        //dm?.ShowDialogueST(new[] { "A stranger speaks to you from the shadows..." }, null);
+        Debug.Log("[MapManager] NPC node — loading NPCEvent scene.");
+        SceneManager.LoadScene("NPCEvent");
     }
 }

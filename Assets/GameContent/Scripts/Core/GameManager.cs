@@ -50,6 +50,13 @@ public class GameManager : MonoBehaviour
         GetComponent<PortraitLock>()?.EnforcePortrait();
     }
 
+    /// <summary>Sets state and fires the event without triggering a scene load. For bootstrapping only.</summary>
+    public void ForceStateST(GameState newState)
+    {
+        CurrentState = newState;
+        OnStateChanged?.Invoke(newState);
+    }
+
     public void ChangeStateST(GameState newState)
     {
         if (CurrentState == newState) return;
